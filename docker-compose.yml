@@ -1,0 +1,57 @@
+services:
+    # app:
+    #     image: taplink-api:latest
+    #     container_name: taplink-api
+    #     build:
+    #         context: .
+    #     working_dir: /home/node/workspace
+    #     command: npm run start:debug
+    #     restart: unless-stopped
+    #     tty: true
+    #     volumes:
+    #         - .:/home/node/workspace
+    #         - /home/node/workspace/node_modules
+    #     networks:
+    #         - taplink-api-network
+    #     env_file:
+    #         - .env.dev
+    #     ports:
+    #         - '5000:5000'
+
+    # redis:
+    #     container_name: redis-db
+    #     image: redis
+    #     restart: unless-stopped
+    #     ports:
+    #         - 6379:6379
+    #     command: redis-server --save 20 1 --loglevel warning
+    #     networks:
+    #         - taplink-api-network
+    #     volumes:
+    #         - redis-data:/data
+
+    database:
+        container_name: postgres-db
+        image: postgres:14.1
+        restart: unless-stopped
+        # volumes:
+        # - postgres-data:/var/lib/postgres
+        # - ./docker/postgres:/docker-entrypoint-initdb.d
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: taplink
+        ports:
+            - 5432:5432
+        networks:
+            - taplink-api-network
+
+networks:
+    taplink-api-network:
+        driver: bridge
+
+volumes:
+    # redis-data:
+    #     driver: local
+    postgres-data:
+        driver: local
