@@ -2,3 +2,8 @@ export * from './create-user-wallet.dto';
 export * from './get-nonce.dto';
 export * from './login-wallet.dto';
 export * from './jwt-payload.dto';
+export * from './create-user.dto';
+export * from './update-user.dto';
+export * from './create-product.dto';
+export * from './update-product.dto';
+export * from './remove-product.dto';

@@ -27,8 +27,14 @@ export enum ETokenStatus {
     Settle = 'settle',
 }
 
-export enum Role {
-    NO_PERMISSION,
-    SUPER_ADMIN,
-    ADMIN,
-}
+// export enum Role {
+//     TIER_1,
+//     TIER_2,
+//     TIER_3,
+//     TIER_4,
+// }
+
+// export enum ProductState {
+//     DRAFT,
+//     RELEASED,
+// }
