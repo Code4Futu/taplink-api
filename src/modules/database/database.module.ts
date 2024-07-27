@@ -2,11 +2,15 @@ import { Module } from '@nestjs/common';
 import { configDb } from './configs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserRepository, UserWalletRepository } from './repositories';
+import {
+    ProductRepository,
+    UserRepository,
+    UserWalletRepository,
+} from './repositories';
 
 import { entities } from './configs/typeorm.config';
 
-const repositories = [UserRepository, UserWalletRepository];
+const repositories = [UserRepository, UserWalletRepository, ProductRepository];
 
 const services = [];
 
