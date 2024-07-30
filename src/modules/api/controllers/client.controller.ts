@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClientService } from '../services';
 import { JwtAuthGuard } from '../guards';
@@ -7,11 +7,27 @@ import { Roles } from '../decorators/roles.decorator';
 import { Role } from '@/database/entities';
 import { ClientIdsDto } from '../dtos/client-ids.dto';
 import { CreateClientDto, UpdateClientDto } from '../dtos';
+import { ClientRepository } from '@/database/repositories';
 
 @ApiTags('Client')
 @Controller('/client')
 export class ClientController {
-    constructor(private readonly clientService: ClientService) {}
+    constructor(
+        private readonly clientService: ClientService,
+        private readonly clientRepository: ClientRepository,
+    ) {}
+
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.TIER_1, Role.TIER_2, Role.TIER_3, Role.TIER_4)
+    @Get()
+    async get() {
+        const [clients, count] = await this.clientRepository.findAndCount({});
+        return {
+            data: clients,
+            count,
+        };
+    }
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
