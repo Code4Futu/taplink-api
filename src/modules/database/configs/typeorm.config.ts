@@ -1,13 +1,14 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
-import { Product, User, UserWallet } from '../entities';
-import { Init1722064683973 } from '../migrations/1722064683973-init';
+import { Client, Product, User, UserWallet } from '../entities';
+import { Init1722351360037 } from '../migrations/1722351360037-init';
+import { AddTier1Admin1722351448334 } from '../migrations/1722351448334-add_tier1_admin';
 
 config();
 const configService = new ConfigService();
-export const entities = [User, UserWallet, Product];
-const migrations = [Init1722064683973];
+export const entities = [User, UserWallet, Product, Client];
+const migrations = [Init1722351360037, AddTier1Admin1722351448334];
 
 export const dbConfig = {
     host: configService.get('DB_HOST'),

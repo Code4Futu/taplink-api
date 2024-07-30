@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { UserWallet } from './user-wallet.entity';
 
 export enum Role {
     TIER_1,
@@ -12,22 +13,19 @@ export enum Role {
 @Entity()
 export class User extends BaseEntity {
     @ApiProperty()
-    @Column({
-        unique: true,
-    })
+    @Column()
     username: string;
-
-    @ApiProperty()
-    @Column({
-        nullable: true,
-    })
-    companyName: string;
 
     @ApiProperty({ enum: Role })
     @Column({
         type: 'enum',
         enum: Role,
-        default: Role.TIER_2,
     })
     role: Role;
+
+    @OneToOne(() => UserWallet, {
+        cascade: true,
+    })
+    @JoinColumn()
+    wallet: UserWallet;
 }

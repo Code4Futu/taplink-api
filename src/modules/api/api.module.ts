@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '@/database';
 import {
     AuthController,
+    ClientController,
     ProductController,
     UserController,
 } from '@/api/controllers';
@@ -11,6 +12,7 @@ import {
     UserWalletService,
     UserService,
     ProductService,
+    ClientService,
 } from '@/api/services';
 // import { BullModule } from '@nestjs/bull';
 // import { ScheduleModule } from '@nestjs/schedule';
@@ -20,9 +22,20 @@ import { JwtModule } from '@nestjs/jwt';
 import { appConfig, SecurityConfig } from 'app.config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
-const controllers = [AuthController, UserController, ProductController];
+const controllers = [
+    AuthController,
+    UserController,
+    ProductController,
+    ClientController,
+];
 
-const services = [AuthService, UserWalletService, UserService, ProductService];
+const services = [
+    AuthService,
+    UserWalletService,
+    UserService,
+    ProductService,
+    ClientService,
+];
 
 @Module({
     imports: [

@@ -1,58 +1,49 @@
+import { EvmService } from '@/blockchain/services';
+import { User } from '@/database/entities';
+import { SIGN_MESSAGE } from '@/shared/constants';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { EntityNotFoundError } from 'typeorm';
-import { UserWalletService } from './user-wallet.service';
-import { GetNonceDto, JwtPayloadDto, LoginWalletDto } from '../dtos';
-import { UserWallet } from '@/database/entities';
 import { SecurityConfig } from 'app.config';
-import { SIGN_MESSAGE } from '@/shared/constants';
-import { EvmService } from '@/blockchain/services';
+import { GetNonceDto, JwtPayloadDto, LoginWalletDto } from '../dtos';
+import { UserWalletService } from './user-wallet.service';
+import { UserService } from './user.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userWalletService: UserWalletService,
+        private readonly userService: UserService,
         private readonly evmService: EvmService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
     ) {}
 
     async getNonceData(query: GetNonceDto) {
-        const userWallet = await this.userWalletService.findOrCreateUserWallet({
-            address: query.address,
-        });
+        const user = await this.userService.findByWallet(query.address);
         return {
-            address: userWallet.address,
-            nonce: userWallet.nonce,
+            address: user.wallet.address,
+            nonce: user.wallet.nonce,
         };
     }
 
     async login(loginWalletDto: LoginWalletDto) {
         const { address, signature } = loginWalletDto;
-
-        const userWallet = await this.userWalletService.findByAddress(address);
-
-        if (!userWallet) {
-            throw new EntityNotFoundError(UserWallet, 'Not Found Wallet.');
-        } else {
-            const hashMsg = `${SIGN_MESSAGE.login}${userWallet.nonce}`;
-            this.evmService.validateSignature(
-                userWallet.address,
-                signature,
-                hashMsg,
-            );
-
-            await this.userWalletService.regenerateNonce(userWallet);
-
-            const payload: JwtPayloadDto = {
-                id: userWallet.id,
-                address: userWallet.address,
-                nonce: userWallet.nonce,
-            };
-
-            return this.generateTokens(payload);
-        }
+        const user = await this.userService.findByWallet(address);
+        const hashMsg = `${SIGN_MESSAGE.login}${user.wallet.nonce}`;
+        this.evmService.validateSignature(
+            user.wallet.address,
+            signature,
+            hashMsg,
+        );
+        await this.userWalletService.regenerateNonce(user.wallet);
+        const payload: JwtPayloadDto = {
+            id: user.id,
+            username: user.username,
+            address: user.wallet.address,
+            role: user.role,
+        };
+        return this.generateTokens(payload);
     }
 
     generateTokens(payload: JwtPayloadDto) {
@@ -75,7 +66,7 @@ export class AuthService {
         });
     }
 
-    validateUser(userId: string): Promise<UserWallet> {
-        return this.userWalletService.findByUsedId(userId);
+    validateUser(userId: string): Promise<User> {
+        return this.userService.findByUsedId(userId);
     }
 }
