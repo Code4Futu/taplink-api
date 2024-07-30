@@ -3,6 +3,7 @@ import { configDb } from './configs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
+    ClientRepository,
     ProductRepository,
     UserRepository,
     UserWalletRepository,
@@ -10,7 +11,12 @@ import {
 
 import { entities } from './configs/typeorm.config';
 
-const repositories = [UserRepository, UserWalletRepository, ProductRepository];
+const repositories = [
+    UserRepository,
+    UserWalletRepository,
+    ProductRepository,
+    ClientRepository,
+];
 
 const services = [];
 

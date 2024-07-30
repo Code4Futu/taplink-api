@@ -1,5 +1,5 @@
+import { Role } from '@/database/entities';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
 
 export class UpdateUserDto {
@@ -10,7 +10,10 @@ export class UpdateUserDto {
     @ApiProperty()
     username: string;
 
-    @ApiProperty()
-    @Transform(({ value }) => value.toLowerCase())
-    address: string;
+    @ApiProperty({
+        enumName: 'role',
+        enum: Role,
+    })
+    @IsNotEmpty()
+    role: Role;
 }

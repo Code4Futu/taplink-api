@@ -4,7 +4,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export enum ProductState {
     DRAFT,
-    RELEASED,
+    SELECTED,
+    PUBLISHED,
 }
 
 @Entity()

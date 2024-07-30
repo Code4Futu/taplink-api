@@ -1,77 +1,78 @@
 import { User, UserWallet } from '@/database/entities';
-import { UserRepository, UserWalletRepository } from '@/database/repositories';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { UserRepository } from '@/database/repositories';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { EntityNotFoundError, In } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../dtos';
 import { UserWalletService } from './user-wallet.service';
+import { IdsDto } from '../dtos/ids.dto';
 
 @Injectable()
 export class UserService {
     constructor(
+        // @Inject(REQUEST) private request,
         private readonly userRepository: UserRepository,
-        private readonly userWalletRepository: UserWalletRepository,
-        private readonly dataSource: DataSource,
         private readonly userWalletService: UserWalletService,
     ) {}
 
-    async create({ address, username }: CreateUserDto) {
-        const isExists = await Promise.all([
-            this.userRepository.exists({
-                where: {
-                    username,
-                },
-            }),
-            this.userWalletRepository.exists({
-                where: {
-                    address,
-                },
-            }),
-        ]);
-        if (isExists.some((i) => i)) {
-            throw new HttpException(
-                'User or wallet exists',
-                HttpStatus.BAD_REQUEST,
-            );
+    async create({ address, username, role }: CreateUserDto) {
+        const exist = await this.userWalletService.findByAddress(address);
+        if (exist) {
+            throw new BadRequestException('Wallet exists');
         }
-        const user = new User();
-        user.username = username;
         const wallet = new UserWallet();
         wallet.address = address;
-        wallet.user = user;
         wallet.nonce = this.userWalletService.generateRandomNonce();
-        await this.dataSource.transaction(async () => {
-            await this.userRepository.save(user);
-            await this.userWalletRepository.save(wallet);
-        });
-        return user;
+        const user = new User();
+        user.username = username;
+        user.role = role;
+        user.wallet = wallet;
+        return this.userRepository.save(user);
     }
 
-    async update({ id, address, username }: UpdateUserDto) {
-        const isExists = await this.userWalletRepository.exists({
-            where: {
-                address,
-            },
-        });
-        if (isExists) {
-            throw new HttpException(
-                'User or wallet exists',
-                HttpStatus.BAD_REQUEST,
-            );
-        }
+    async update({ id, role, username }: UpdateUserDto) {
         const user = await this.userRepository.findOne({
             where: {
                 id,
             },
         });
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
         user.username = username;
-        const wallet = new UserWallet();
-        wallet.address = address;
-        wallet.user = user;
-        wallet.nonce = this.userWalletService.generateRandomNonce();
-        await this.dataSource.transaction(async () => {
-            await this.userRepository.save(user);
-            await this.userWalletRepository.save(wallet);
+        user.role = role;
+        return this.userRepository.save(user);
+    }
+
+    async findByUsedId(userId: string) {
+        return this.userRepository.findOne({
+            where: {
+                id: userId,
+            },
         });
+    }
+
+    async findByWallet(wallet: string) {
+        const user = await this.userRepository.findOne({
+            relations: {
+                wallet: true,
+            },
+            where: {
+                wallet: {
+                    address: wallet,
+                },
+            },
+        });
+        if (!user) {
+            throw new EntityNotFoundError(User, 'User not found');
+        }
         return user;
+    }
+
+    softDelete({ ids }: IdsDto) {
+        return this.userRepository.softDelete({ id: In(ids) });
+    }
+
+    restore({ ids }: IdsDto) {
+        return this.userRepository.restore({ id: In(ids) });
     }
 }

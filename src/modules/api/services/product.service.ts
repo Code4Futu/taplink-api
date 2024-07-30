@@ -1,8 +1,8 @@
-import { ProductRepository } from '@/database/repositories';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateProductDto, RemoveProductDto, UpdateProductDto } from '../dtos';
 import { Product } from '@/database/entities';
+import { ProductRepository } from '@/database/repositories';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
+import { CreateProductDto, RemoveProductDto, UpdateProductDto } from '../dtos';
 
 @Injectable()
 export class ProductService {
@@ -52,10 +52,7 @@ export class ProductService {
             where: { id },
         });
         if (!product) {
-            throw new HttpException(
-                'Product not found',
-                HttpStatus.BAD_REQUEST,
-            );
+            throw new BadRequestException('Product not found');
         }
         product.title = title;
         product.brand = brand;
@@ -71,7 +68,11 @@ export class ProductService {
         return this.productRepository.save(product);
     }
 
-    remove({ ids }: RemoveProductDto) {
-        return this.productRepository.delete({ id: In(ids) });
+    softDelete({ ids }: RemoveProductDto) {
+        return this.productRepository.softDelete({ id: In(ids) });
+    }
+
+    restore({ ids }: RemoveProductDto) {
+        return this.productRepository.restore({ id: In(ids) });
     }
 }
