@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    Post,
+    Query,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RemoveProductDto, UpdateProductDto } from '../dtos';
 import { CreateProductDto } from '../dtos/create-product.dto';
@@ -10,6 +19,7 @@ import { Role } from '@/database/entities';
 import { QueryProductDto } from '../dtos/query-product.dto';
 import { ProductRepository } from '@/database/repositories';
 import { Like } from 'typeorm';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Product')
 @Controller('/product')
@@ -39,16 +49,50 @@ export class ProductController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.TIER_1, Role.TIER_2, Role.TIER_3, Role.TIER_4)
     @Post()
-    public create(@Body() product: CreateProductDto) {
-        return this.productService.create(product);
+    @UseInterceptors(
+        FileFieldsInterceptor([
+            { name: 'feature', maxCount: 1 },
+            { name: 'additional', maxCount: 7 },
+        ]),
+    )
+    public create(
+        @Body() product: CreateProductDto,
+        @UploadedFiles()
+        files: {
+            feature?: Express.Multer.File[];
+            additional?: Express.Multer.File[];
+        },
+    ) {
+        return this.productService.create(
+            product,
+            files.feature,
+            files.additional,
+        );
     }
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.TIER_1, Role.TIER_2, Role.TIER_3, Role.TIER_4)
     @Post('update')
-    public update(@Body() product: UpdateProductDto) {
-        return this.productService.update(product);
+    // @UseInterceptors(
+    //     FileFieldsInterceptor([
+    //         { name: 'feature', maxCount: 1 },
+    //         { name: 'additional', maxCount: 7 },
+    //     ]),
+    // )
+    public update(
+        @Body() product: UpdateProductDto,
+        // @UploadedFiles()
+        // files: {
+        //     feature?: Express.Multer.File[];
+        //     additional?: Express.Multer.File[];
+        // },
+    ) {
+        return this.productService.update(
+            product,
+            // files.feature.filename,
+            // files.additional.map((f) => f.filename),
+        );
     }
 
     @ApiBearerAuth()

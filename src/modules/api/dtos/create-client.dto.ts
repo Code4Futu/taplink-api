@@ -4,10 +4,6 @@ import { IsNotEmpty } from 'class-validator';
 export class CreateClientDto {
     @ApiProperty()
     @IsNotEmpty()
-    logo: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
     name: string;
 
     @ApiProperty()

@@ -8,6 +8,14 @@ export interface Config {
     security: SecurityConfig;
 }
 
+export interface S3Config {
+    accessKeyId: string;
+    secretAccessKey: string;
+    region: string;
+    bucket: string;
+    base1IdImagePath: string;
+}
+
 export interface SecurityConfig {
     jwtAccessSecret: string;
     jwtRefreshSecret: string;
@@ -25,3 +33,11 @@ export const appConfig = (): Config => ({
         bcryptSaltOrRound: 10,
     },
 });
+
+export const s3Config: S3Config = {
+    accessKeyId: configService.get('S3_ACCESS_KEY_ID'),
+    secretAccessKey: configService.get('S3_SECRET_ACCESS_KEY'),
+    region: configService.get('S3_REGION'),
+    bucket: configService.get('S3_BUCKET'),
+    base1IdImagePath: configService.get('S3_BASE_1ID_IMAGE_PATH'),
+};

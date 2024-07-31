@@ -9,10 +9,6 @@ export class UpdateClientDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    logo: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
     name: string;
 
     @ApiProperty()

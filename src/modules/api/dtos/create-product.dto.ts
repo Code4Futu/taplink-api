@@ -11,31 +11,23 @@ export class CreateProductDto {
     brand: string;
 
     @ApiProperty()
-    type: string;
+    type?: string;
 
     @ApiProperty()
-    quantity: number;
+    quantity?: number;
 
     @ApiProperty({
         isArray: true,
     })
-    colors: string[];
+    colors?: string[];
 
     @ApiProperty()
-    country: string;
+    country?: string;
 
     @ApiProperty()
-    manufactoringDate: Date;
+    manufactoringDate?: Date;
 
     @ApiProperty()
     @IsNotEmpty()
     description: string;
-
-    @ApiProperty()
-    featureImage: string;
-
-    @ApiProperty({
-        isArray: true,
-    })
-    additionalImages: string[];
 }

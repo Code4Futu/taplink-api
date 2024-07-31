@@ -14,30 +14,22 @@ export class UpdateProductDto {
     brand: string;
 
     @ApiProperty()
-    type: string;
+    type?: string;
 
     @ApiProperty()
-    quantity: number;
+    quantity?: number;
 
     @ApiProperty({
         isArray: true,
     })
-    colors: string[];
+    colors?: string[];
 
     @ApiProperty()
-    country: string;
+    country?: string;
 
     @ApiProperty()
-    manufactoringDate: Date;
+    manufactoringDate?: Date;
 
     @ApiProperty()
     description: string;
-
-    @ApiProperty()
-    featureImage: string;
-
-    @ApiProperty({
-        isArray: true,
-    })
-    additionalImages: string[];
 }

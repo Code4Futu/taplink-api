@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    Post,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClientService } from '../services';
 import { JwtAuthGuard } from '../guards';
@@ -8,6 +16,7 @@ import { Role } from '@/database/entities';
 import { ClientIdsDto } from '../dtos/client-ids.dto';
 import { CreateClientDto, UpdateClientDto } from '../dtos';
 import { ClientRepository } from '@/database/repositories';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Client')
 @Controller('/client')
@@ -33,16 +42,24 @@ export class ClientController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.TIER_1, Role.TIER_2)
     @Post()
-    public create(@Body() client: CreateClientDto) {
-        return this.clientService.create(client);
+    @UseInterceptors(FileInterceptor('file'))
+    public create(
+        @Body() client: CreateClientDto,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        return this.clientService.create(client, file);
     }
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.TIER_1, Role.TIER_2)
     @Post('update')
-    public update(@Body() client: UpdateClientDto) {
-        return this.clientService.update(client);
+    @UseInterceptors(FileInterceptor('file'))
+    public update(
+        @Body() client: UpdateClientDto,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        return this.clientService.update(client, file);
     }
 
     @ApiBearerAuth()
