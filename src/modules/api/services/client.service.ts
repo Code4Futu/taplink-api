@@ -4,14 +4,19 @@ import { CreateClientDto, UpdateClientDto } from '../dtos';
 import { Client } from '@/database/entities';
 import { ClientIdsDto } from '../dtos/client-ids.dto';
 import { In } from 'typeorm';
+import { S3Service } from 'modules/s3';
 
 @Injectable()
 export class ClientService {
-    constructor(private readonly clientRepository: ClientRepository) {}
+    constructor(
+        private readonly clientRepository: ClientRepository,
+        private readonly s3Service: S3Service,
+    ) {}
 
-    create(clientDto: CreateClientDto) {
+    async create(clientDto: CreateClientDto, file: Express.Multer.File) {
+        const logo = await this.s3Service.uploadFile(file);
         const client = new Client();
-        client.logo = clientDto.logo;
+        client.logo = logo;
         client.name = clientDto.name;
         client.address = clientDto.address;
         client.numOfItemCredits = clientDto.numOfItemCredits;
@@ -30,7 +35,7 @@ export class ClientService {
         return this.clientRepository.save(client);
     }
 
-    async update(clientDto: UpdateClientDto) {
+    async update(clientDto: UpdateClientDto, file?: Express.Multer.File) {
         const client = await this.clientRepository.findOne({
             where: {
                 id: clientDto.id,
@@ -39,7 +44,11 @@ export class ClientService {
         if (!client) {
             throw new BadRequestException('Client not found');
         }
-        client.logo = clientDto.logo;
+        if (file) {
+            const oldLogo = client.logo;
+            client.logo = await this.s3Service.uploadFile(file);
+            await this.s3Service.removeFile(oldLogo);
+        }
         client.name = clientDto.name;
         client.address = clientDto.address;
         client.numOfItemCredits = clientDto.numOfItemCredits;

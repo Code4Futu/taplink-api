@@ -21,6 +21,7 @@ import { BlockchainModule } from '@/blockchain';
 import { JwtModule } from '@nestjs/jwt';
 import { appConfig, SecurityConfig } from 'app.config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { S3Module } from 'modules/s3';
 
 const controllers = [
     AuthController,
@@ -67,6 +68,7 @@ const services = [
             },
             inject: [ConfigService],
         }),
+        S3Module,
     ],
     controllers: [...controllers],
     providers: [...services, JwtStrategy],
